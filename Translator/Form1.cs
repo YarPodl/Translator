@@ -15,6 +15,17 @@ namespace Translator
         public Form1()
         {
             InitializeComponent();
+            
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            MyTranslator translator = new MyTranslator(richTextBox1.Text);
+            var n = translator.LexicalAnalysis(richTextBox1.Text);
+            foreach (var item in n)
+            {
+                listBox1.Items.Add(item.ToString());
+            }
         }
     }
 }
