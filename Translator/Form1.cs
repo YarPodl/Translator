@@ -20,11 +20,35 @@ namespace Translator
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MyTranslator translator = new MyTranslator(richTextBox1.Text);
-            var n = translator.LexicalAnalysis(richTextBox1.Text);
-            foreach (var item in n)
+            listBox1.Items.Clear();
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionBackColor = SystemColors.Window;
+            richTextBox1.DeselectAll();
+            label1.Text = "";
+            label2.Text = "";
+            try
             {
-                listBox1.Items.Add(item.ToString());
+                MyTranslator translator = new MyTranslator(richTextBox1.Text);
+                var n = translator.LexicalAnalysis(richTextBox1.Text);
+                foreach (var item in n)
+                {
+                    listBox1.Items.Add(item.ToString());
+                }
+                var b = translator.Parse(n, listBox1);
+                label1.Text = b ? "Принадлежит" : "Не принадлежит";
+            }
+            catch (MyTranslator.TranslateExeption ex)
+            {
+                int offset = richTextBox1.TextLength - ex.offset;
+                int endLine = richTextBox1.Text.IndexOf('\n', offset);
+                richTextBox1.Select(offset, endLine - offset);
+                richTextBox1.SelectionBackColor = Color.Red;
+                label1.Text = ex.Message;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
         }
     }
