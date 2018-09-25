@@ -43,14 +43,31 @@ namespace Translator
             [(TT.PARENTHESISCLOSE, TT.VariablesList)] = new List<TT>(){  },
             [(TT.INTEGER, TT.VariablesList)] = new List<TT>(){  },
             [(TT.IDENT, TT.Assignment)] = new List<TT>(){ TT.IDENT, TT.EQUALLY, TT.Expression, TT.SEMICOLON },
-            [(TT.UNOBYNOPERATION, TT.Expression)] = new List<TT>(){ TT.UNOBYNOPERATION, TT.Expression },
+
+            [(TT.UNOBYNOPERATION, TT.Expression)] = new List<TT>(){ TT.UNOBYNOPERATION, TT.ExpressionNotMinus },
             [(TT.PARENTHESISOPEN, TT.Expression)] = new List<TT>(){ TT.PARENTHESISOPEN,
-                                                        TT.Expression, TT.PARENTHESISOPEN, TT.Subexpression },
+                                                        TT.Expression, TT.PARENTHESISCLOSE, TT.Subexpression },
             [(TT.IDENT, TT.Expression)] = new List<TT>(){ TT.IDENT, TT.Subexpression },
             [(TT.NUMLITERAL, TT.Expression)] = new List<TT>(){ TT.NUMLITERAL, TT.Subexpression },
-            [(TT.BYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.BYNOPERATION, TT.Expression },
-            [(TT.UNOBYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.UNOBYNOPERATION, TT.Expression },
+
+
+
+            [(TT.UNOBYNOPERATION, TT.SecondExpression)] = new List<TT>() { TT.UNOBYNOPERATION, TT.ExpressionNotMinus },
+            [(TT.PARENTHESISOPEN, TT.SecondExpression)] = new List<TT>(){ TT.PARENTHESISOPEN,
+                                                        TT.Expression, TT.PARENTHESISCLOSE, TT.Subexpression },
+            [(TT.IDENT, TT.SecondExpression)] = new List<TT>() { TT.IDENT, TT.Subexpression },
+            [(TT.NUMLITERAL, TT.SecondExpression)] = new List<TT>() { TT.NUMLITERAL, TT.Subexpression },
+            [(TT.PARENTHESISCLOSE, TT.SecondExpression)] = new List<TT>() { },
+
+
+            [(TT.PARENTHESISOPEN, TT.ExpressionNotMinus)] = new List<TT>(){ TT.PARENTHESISOPEN,
+                                                        TT.Expression, TT.PARENTHESISCLOSE, TT.Subexpression },
+            [(TT.IDENT, TT.ExpressionNotMinus)] = new List<TT>() { TT.IDENT, TT.Subexpression },
+            [(TT.NUMLITERAL, TT.ExpressionNotMinus)] = new List<TT>() { TT.NUMLITERAL, TT.Subexpression },
+            [(TT.BYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.BYNOPERATION, TT.SecondExpression },
+            [(TT.UNOBYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.UNOBYNOPERATION, TT.SecondExpression },
             [(TT.SEMICOLON, TT.Subexpression)] = new List<TT>() { },
+            [(TT.PARENTHESISCLOSE, TT.Subexpression)] = new List<TT>() { },
             [(TT.DO, TT.Subexpression)] = new List<TT>() { },
             [(TT.TO, TT.Subexpression)] = new List<TT>() { },
         };
@@ -110,6 +127,8 @@ namespace Translator
             VariablesList,
             Assignment,
             Expression,
+            ExpressionNotMinus,
+            SecondExpression,
             Subexpression,
         };
 
