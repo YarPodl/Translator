@@ -49,15 +49,6 @@ namespace Translator
             [(TT.IDENT, TT.Expression)] = new List<TT>(){ TT.IDENT, TT.Subexpression },
             [(TT.NUMLITERAL, TT.Expression)] = new List<TT>(){ TT.NUMLITERAL, TT.Subexpression },
 
-
-            /*
-            [(TT.PARENTHESISOPEN, TT.SecondExpression)] = new List<TT>(){ TT.PARENTHESISOPEN,
-                                                        TT.Expression, TT.PARENTHESISCLOSE, TT.Subexpression },
-            [(TT.IDENT, TT.SecondExpression)] = new List<TT>() { TT.IDENT, TT.Subexpression },
-            [(TT.NUMLITERAL, TT.SecondExpression)] = new List<TT>() { TT.NUMLITERAL, TT.Subexpression },
-            [(TT.PARENTHESISCLOSE, TT.SecondExpression)] = new List<TT>() { },
-            */
-
             [(TT.PARENTHESISOPEN, TT.ExpressionNotMinus)] = new List<TT>(){ TT.PARENTHESISOPEN,
                                                         TT.Expression, TT.PARENTHESISCLOSE, TT.Subexpression },
             [(TT.IDENT, TT.ExpressionNotMinus)] = new List<TT>() { TT.IDENT, TT.Subexpression },
