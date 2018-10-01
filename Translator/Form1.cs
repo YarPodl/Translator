@@ -24,26 +24,28 @@ namespace Translator
             richTextBox1.SelectAll();
             richTextBox1.SelectionBackColor = SystemColors.Window;
             richTextBox1.DeselectAll();
-            label1.Text = "";
+            textBox1.Text = "";
             label2.Text = "";
             try
             {
                 MyTranslator translator = new MyTranslator(richTextBox1.Text);
-                var n = translator.LexicalAnalysis(richTextBox1.Text);
+                var n = translator.LexicalAnalysis();
                 foreach (var item in n)
                 {
                     listBox1.Items.Add(item.ToString());
                 }
-                var b = translator.Parse(n, listBox1);
-                label1.Text = b ? "Принадлежит" : "Не принадлежит";
+                translator.Parse(listBox1);
+                textBox1.Text = "Принадлежит";
             }
             catch (MyTranslator.TranslateExeption ex)
             {
                 int offset = richTextBox1.TextLength - ex.offset;
-                int endLine = richTextBox1.Text.IndexOf('\n', offset);
-                richTextBox1.Select(offset, endLine - offset);
+                richTextBox1.Select(offset, ex.length);
                 richTextBox1.SelectionBackColor = Color.Red;
-                label1.Text = ex.Message;
+                textBox1.Text = ex.Message;
+                int line = richTextBox1.GetLineFromCharIndex(offset);
+                int column = offset - richTextBox1.GetFirstCharIndexFromLine(line);
+                textBox1.Text += $" (Строка {line + 1}, символ {column})";
 
             }
             catch (Exception ex)

@@ -12,25 +12,25 @@ namespace Translator
     class MyTranslator
     {
         String code;
-        String[] keyWords = new string[]
+        Queue<Token> tokens;
+
+        public MyTranslator(string code)
         {
-            "VAR",
-            "BEGIN",
-            "END",
-            "INTEGER",
-            "FOR",
-            "TO",
-            "DO",
-            "END_FOR",
-        };
-        Dictionary<(TT, TT), List<TT>> regulations = new Dictionary<(TT, TT), List<TT>>()
+            this.code = code;
+        }
+
+        private static Dictionary<(TT, TT), List<TT>> regulations = 
+                                new Dictionary<(TT, TT), List<TT>>()
         {
             [(TT.VAR, TT.Program)] = new List<TT>(){ TT.DeclarOfVar, TT.CalculationDescrip },
-            [(TT.VAR, TT.DeclarOfVar)] = new List<TT>(){ TT.VAR, TT.VariablesList, TT.INTEGER, TT.SEMICOLON },
+            [(TT.VAR, TT.DeclarOfVar)] = new List<TT>(){ TT.VAR, TT.IDENT, TT.VariablesList, TT.INTEGER,
+                                                       TT.SEMICOLON },
             [(TT.BEGIN, TT.CalculationDescrip)] = new List<TT>(){ TT.BEGIN, TT.InstructionList, TT.END },
-            [(TT.READ, TT.InstructionList)] = new List<TT>(){ TT.READ, TT.PARENTHESISOPEN, TT.VariablesList,
+            [(TT.READ, TT.InstructionList)] = new List<TT>(){ TT.READ, TT.PARENTHESISOPEN, TT.IDENT,
+                                                       TT.VariablesList,
                                                        TT.PARENTHESISCLOSE, TT.SEMICOLON, TT.InstructionList },
-            [(TT.WRITE, TT.InstructionList)] = new List<TT>(){ TT.WRITE, TT.PARENTHESISOPEN, TT.VariablesList,
+            [(TT.WRITE, TT.InstructionList)] = new List<TT>(){ TT.WRITE, TT.PARENTHESISOPEN, TT.IDENT,
+                                                       TT.VariablesList,
                                                        TT.PARENTHESISCLOSE, TT.SEMICOLON, TT.InstructionList },
             [(TT.IDENT, TT.InstructionList)] = new List<TT>(){ TT.Assignment, TT.InstructionList },
             [(TT.FOR, TT.InstructionList)] = new List<TT>(){ TT.FOR, TT.IDENT, TT.EQUALLY,
@@ -38,7 +38,6 @@ namespace Translator
                                                        TT.END_FOR, TT.SEMICOLON, TT.InstructionList },
             [(TT.END_FOR, TT.InstructionList)] = new List<TT>(){ },
             [(TT.END, TT.InstructionList)] = new List<TT>(){ },
-            [(TT.IDENT, TT.VariablesList)] = new List<TT>(){ TT.IDENT, TT.VariablesList },
             [(TT.COMMA, TT.VariablesList)] = new List<TT>(){ TT.COMMA, TT.IDENT, TT.VariablesList },
             [(TT.PARENTHESISCLOSE, TT.VariablesList)] = new List<TT>(){  },
             [(TT.INTEGER, TT.VariablesList)] = new List<TT>(){  },
@@ -51,52 +50,27 @@ namespace Translator
             [(TT.NUMLITERAL, TT.Expression)] = new List<TT>(){ TT.NUMLITERAL, TT.Subexpression },
 
 
-
-            [(TT.UNOBYNOPERATION, TT.SecondExpression)] = new List<TT>() { TT.UNOBYNOPERATION, TT.ExpressionNotMinus },
+            /*
             [(TT.PARENTHESISOPEN, TT.SecondExpression)] = new List<TT>(){ TT.PARENTHESISOPEN,
                                                         TT.Expression, TT.PARENTHESISCLOSE, TT.Subexpression },
             [(TT.IDENT, TT.SecondExpression)] = new List<TT>() { TT.IDENT, TT.Subexpression },
             [(TT.NUMLITERAL, TT.SecondExpression)] = new List<TT>() { TT.NUMLITERAL, TT.Subexpression },
             [(TT.PARENTHESISCLOSE, TT.SecondExpression)] = new List<TT>() { },
-
+            */
 
             [(TT.PARENTHESISOPEN, TT.ExpressionNotMinus)] = new List<TT>(){ TT.PARENTHESISOPEN,
                                                         TT.Expression, TT.PARENTHESISCLOSE, TT.Subexpression },
             [(TT.IDENT, TT.ExpressionNotMinus)] = new List<TT>() { TT.IDENT, TT.Subexpression },
             [(TT.NUMLITERAL, TT.ExpressionNotMinus)] = new List<TT>() { TT.NUMLITERAL, TT.Subexpression },
-            [(TT.BYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.BYNOPERATION, TT.SecondExpression },
-            [(TT.UNOBYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.UNOBYNOPERATION, TT.SecondExpression },
+
+            [(TT.BYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.BYNOPERATION, TT.ExpressionNotMinus },
+            [(TT.UNOBYNOPERATION, TT.Subexpression)] = new List<TT>() { TT.UNOBYNOPERATION, TT.ExpressionNotMinus },
             [(TT.SEMICOLON, TT.Subexpression)] = new List<TT>() { },
             [(TT.PARENTHESISCLOSE, TT.Subexpression)] = new List<TT>() { },
             [(TT.DO, TT.Subexpression)] = new List<TT>() { },
             [(TT.TO, TT.Subexpression)] = new List<TT>() { },
         };
-
-        public MyTranslator(String code)
-        {
-            this.code = code;
-        }
-
-
-        void Translate()
-        {
-            
-        }
-
-
-        class key
-        {
-            char c1, c2;
-        }
-
-
-
-
-
-
-
-
-
+        
 
         public enum TT
         {
@@ -112,9 +86,9 @@ namespace Translator
             READ,
             SEMICOLON,
             EQUALLY,
-            COMMA,
             PARENTHESISOPEN,
             PARENTHESISCLOSE,
+            COMMA,
             IDENT, 
             NUMLITERAL,
             BYNOPERATION,
@@ -123,7 +97,6 @@ namespace Translator
             DeclarOfVar,
             CalculationDescrip,
             InstructionList,
-            Instruction,
             VariablesList,
             Assignment,
             Expression,
@@ -132,16 +105,39 @@ namespace Translator
             Subexpression,
         };
 
-        public class Token
+        /// <summary>
+        /// Класс, описывающий лексему
+        /// </summary>
+        private class Token
         {
+            /// <summary>
+            /// Тип лексемы
+            /// </summary>
             public TT Type;
+            /// <summary>
+            /// Значение лексемы
+            /// </summary>
             public string StringValue;
+            /// <summary>
+            /// Положение лексемы в коде (считая с конца)
+            /// </summary>
             public int offset;
+            /// <summary>
+            /// Длина лексемы
+            /// </summary>
+            public int length;
 
             public Token(TT type)
             {
                 Type = type;
-                StringValue = type.ToString();
+                if (MyTranslator.stringValues.TryGetValue(type, out string value))
+                {
+                    StringValue = value;
+                }
+                else
+                {
+                    StringValue = type.ToString();
+                }
             }
 
             public Token(TT type, string stringValue)
@@ -150,9 +146,10 @@ namespace Translator
                 StringValue = stringValue;
             }
 
-            public Token(TT type, string stringValue, int offset) : this(type, stringValue)
+            public Token(TT type, string stringValue, int offset, int length) : this(type, stringValue)
             {
                 this.offset = offset;
+                this.length = length;
             }
 
             public override bool Equals(object obj)
@@ -176,7 +173,7 @@ namespace Translator
         }
 
         // регулярки, описывающие лексему, начинаются с ^, чтобы матчить только в начале
-        Dictionary<TT, Regex> regexes = new Dictionary<TT, Regex>()
+        private static Dictionary<TT, Regex> regexes = new Dictionary<TT, Regex>()
         {
             [TT.SEMICOLON] = new Regex(@"^;", RegexOptions.Compiled),
             [TT.COMMA] = new Regex(@"^,", RegexOptions.Compiled),
@@ -201,11 +198,11 @@ namespace Translator
         
 
         // а вот и вся логика:
-        public Queue<Token> LexicalAnalysis(string text)
+        public IEnumerable<string> LexicalAnalysis()
         {
             var result = new Queue<Token>();
             // откусываем пробелы
-            var remainingText = text.TrimStart(' ', '\n', '\t');
+            var remainingText = code.TrimStart(' ', '\n', '\t');
             while (remainingText != "")
             {
                 // находим наиболее подходящий паттерн:
@@ -222,73 +219,100 @@ namespace Translator
                 // если везде только 0, ошибка
                 if (bestMatch.matchLen == 0)
                 {
-                    throw new TranslateExeption("Неизвестная лексема", remainingText.Length);
+                    throw new TranslateExeption("Неизвестная лексема", remainingText.Length, 1);
                 }
                 if (bestMatch.matchLen > 10)
                 {
-                    throw new TranslateExeption("Превышена длина идентефикатора", remainingText.Length);
+                    throw new TranslateExeption("Превышена длина идентефикатора", remainingText.Length,
+                                                                                    bestMatch.matchLen);
                 }
-                var token = new Token(bestMatch.tokenType, bestMatch.text, remainingText.Length);
+                var token = new Token(bestMatch.tokenType, bestMatch.text, 
+                    remainingText.Length, bestMatch.matchLen);
                 result.Enqueue(token);
 
                 // откусываем распознанный кусок и пробелы после него
                 remainingText = remainingText.Substring(bestMatch.matchLen).TrimStart();
             }
-            return result;
+            tokens = result;
+            return from i in tokens select i.ToString();
         }
 
-        public bool Parse(Queue<Token> tokens, ListBox listBox)
+        public void Parse(ListBox listBox)
         {
             Stack<Token> stack = new Stack<Token>();
-            stack.Push(new Token(TT.Program));
-            List<string> identList = new List<string>();
-            bool declaration = true;
+            stack.Push(new Token(TT.Program));          // Начальный символ
+            List<string> identList = new List<string>();// Таблица идентефикаторов
+            bool declaration = true;                    // Объявление переменных
+            Token inputToken;                           // Текущий символ входной цепочки
+            Token stacksToken;                          // Символ, вынутый из стека
 
-            int j = 0; //////////////////////////// temp
+            int numberOfToken = 0;
             while (tokens.Count > 0)
             {
-                Token stacksToken = stack.Pop();
-                Token inputToken = tokens.Peek();
-                if (inputToken.Type == TT.IDENT)
+                inputToken = tokens.Peek();   
+                if (stack.Count == 0)               // Если стек пуст
                 {
-                    if (declaration)
+                    throw new TranslateExeption("Встречено: '" + inputToken.StringValue +
+                        "', а ожидался конец файла",
+                        inputToken.offset, inputToken.length);
+                }
+                stacksToken = stack.Pop();    
+                if (inputToken.Type == TT.IDENT)    // Если идентефикатор
+                {
+                    if (declaration)    // Если происходит объявление
                     {
-                        identList.Add(inputToken.StringValue);
+                        identList.Add(inputToken.StringValue);  // Занести в таблицу
                     }
-                    else
+                    else     // Если объявление закончено
                     {
-                        if (!identList.Contains(inputToken.StringValue))
+                        // Если идентефикатора, нет в таблице
+                        if (!identList.Contains(inputToken.StringValue))    
                         {
+                            // Ошибка
                             throw new TranslateExeption("Необъявленный идентефикатор: " +
-                                inputToken.StringValue, inputToken.offset);
+                                inputToken.StringValue, inputToken.offset, inputToken.length);
                         }
                     }
                 }
-                if (stacksToken.Equals(inputToken))
+                if (stacksToken.Equals(inputToken)) // Если стековый символ - терминал и равен входному
                 {
-                    tokens.Dequeue();
-                    //////////////////////////// temp
-                    listBox.Items[j] += "\tOk";
-                    j++;
+                    tokens.Dequeue();   // Чтение символа из входной цепочки
+                    listBox.Items[numberOfToken] += "\tOk";
+                    numberOfToken++;
                 }
                 else
                 {
-                    if (stacksToken.Type < TT.Program) // Терминальный символ
+                    if (stacksToken.Type < TT.Program) // Если в стеке терминальный символ
                     {
-                        throw new TranslateExeption("Ожидалось " + stacksToken.StringValue, inputToken.offset);
+                        // Ошибка
+                        throw new TranslateExeption("Ожидалось " + stacksToken.StringValue, 
+                            inputToken.offset, inputToken.length);
                     }
-                    List<TT> regulation;
+                    // Если в стеке нетерминальный символ 
+                    List<TT> regulation;    // Хранит правило
+                    // Если нет подходящего правила
                     if (!regulations.TryGetValue((inputToken.Type, stacksToken.Type), out regulation))
                     {
-                        throw new TranslateExeption("Ошибочный синтаксис", inputToken.offset);
+                        string errMessage = "Ошибочный синтаксис, ожидалось ";
+                        foreach (var (t1, t2) in regulations.Keys)  // Поиск всех правил
+                        {
+                            if (t2 == stacksToken.Type) // для текущего стекового символа ожидают 
+                            {
+                                errMessage += "'" + new Token(t1).StringValue + "'  ";
+                            }
+                        }
+                        //  Вывод всех возможных ожидаемых символов
+                        throw new TranslateExeption(errMessage, inputToken.offset, inputToken.length);
                     }
-                    for (int i = regulation.Count - 1; i > -1; i--)
+                    for (int i = regulation.Count - 1; i > -1; i--) // Занесение символов в стек
                     {
-                        if (regulation[i] == TT.InstructionList)
+                        // Если начался список инструкций - объявление переменных закончено
+                        if (regulation[i] == TT.InstructionList)    
                         {
                             declaration = false;
                         }
-                        if (regulation[i] == inputToken.Type)
+                        if (regulation[i] == inputToken.Type)   // Занесение лексем в стек
+
                         {
                             stack.Push(inputToken);
                         }
@@ -299,19 +323,45 @@ namespace Translator
                     }
                 }
             }
-            return stack.Count == 0;
+            if (stack.Count != 0)
+            {
+                // Ошибка
+                throw new TranslateExeption("Ожидалось " + stack.Peek().StringValue,
+                    0, 0);
+            };
         }
 
 
         public class TranslateExeption : Exception
         {
             public readonly int offset;
+            public readonly int length;
 
-            public TranslateExeption(string message, int offset) : base(message)
+            public TranslateExeption(string message, int offset, int length) : base(message)
             {
                 this.offset = offset;
+                this.length = length;
 
             }
         }
+
+        // Соответствие лексемы и ее значения
+        private static Dictionary<TT, string> stringValues = new Dictionary<TT, string>()
+        {
+            [TT.SEMICOLON] = ";",
+            [TT.EQUALLY] = "=",
+            [TT.PARENTHESISOPEN] = "(",
+            [TT.PARENTHESISCLOSE] = ")",
+            [TT.COMMA] = ",",
+            [TT.IDENT] = "Идентефикатор",
+            [TT.NUMLITERAL] = "Число",
+            [TT.BYNOPERATION] = "+'  '*",
+            [TT.UNOBYNOPERATION] = "-",
+            [TT.InstructionList] = "список инструкций",
+            [TT.CalculationDescrip] = "описание вычислений",
+            [TT.DeclarOfVar] = "объявление переменных",
+            [TT.VariablesList] = "список переменных",
+            [TT.Program] = "программа",
+        };
     }
 }
