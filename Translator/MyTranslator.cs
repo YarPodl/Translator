@@ -26,6 +26,7 @@ namespace Translator
             [(TT.VAR, TT.DeclarOfVar)] = new List<TT>(){ TT.VAR, TT.IDENT, TT.VariablesList, TT.INTEGER,
                                                        TT.SEMICOLON },
             [(TT.BEGIN, TT.CalculationDescrip)] = new List<TT>(){ TT.BEGIN, TT.InstructionList, TT.END },
+
             [(TT.READ, TT.InstructionList)] = new List<TT>(){ TT.READ, TT.PARENTHESISOPEN, TT.IDENT,
                                                        TT.VariablesList,
                                                        TT.PARENTHESISCLOSE, TT.SEMICOLON, TT.InstructionList },
@@ -38,9 +39,11 @@ namespace Translator
                                                        TT.END_FOR, TT.SEMICOLON, TT.InstructionList },
             [(TT.END_FOR, TT.InstructionList)] = new List<TT>(){ },
             [(TT.END, TT.InstructionList)] = new List<TT>(){ },
+
             [(TT.COMMA, TT.VariablesList)] = new List<TT>(){ TT.COMMA, TT.IDENT, TT.VariablesList },
             [(TT.PARENTHESISCLOSE, TT.VariablesList)] = new List<TT>(){  },
             [(TT.INTEGER, TT.VariablesList)] = new List<TT>(){  },
+
             [(TT.IDENT, TT.Assignment)] = new List<TT>(){ TT.IDENT, TT.EQUALLY, TT.Expression, TT.SEMICOLON },
 
             [(TT.UNOBYNOPERATION, TT.Expression)] = new List<TT>(){ TT.UNOBYNOPERATION, TT.ExpressionNotMinus },
@@ -247,7 +250,12 @@ namespace Translator
                         "', а ожидался конец файла",
                         inputToken.offset, inputToken.length);
                 }
-                stacksToken = stack.Pop();    
+                stacksToken = stack.Pop();
+                // Если начался список инструкций - объявление переменных закончено
+                if (inputToken.Type == TT.BEGIN)
+                {
+                    declaration = false;
+                }
                 if (inputToken.Type == TT.IDENT)    // Если идентефикатор
                 {
                     if (declaration)    // Если происходит объявление
@@ -285,25 +293,19 @@ namespace Translator
                     if (!regulations.TryGetValue((inputToken.Type, stacksToken.Type), out regulation))
                     {
                         string errMessage = "Ошибочный синтаксис, ожидалось ";
-                        foreach (var (t1, t2) in regulations.Keys)  // Поиск всех правил
+                        foreach (var (t1, t2) in regulations.Keys)  // Поиск всех правил     
                         {
-                            if (t2 == stacksToken.Type) // для текущего стекового символа ожидают 
+                            if (t2 == stacksToken.Type) // для текущего стекового символа ожидают    
                             {
                                 errMessage += "'" + new Token(t1).StringValue + "'  ";
                             }
                         }
                         //  Вывод всех возможных ожидаемых символов
-                        throw new TranslateExeption(errMessage, inputToken.offset, inputToken.length);
-                    }
+                        throw new TranslateExeption(errMessage, inputToken.offset, inputToken.length);   
+                     }
                     for (int i = regulation.Count - 1; i > -1; i--) // Занесение символов в стек
                     {
-                        // Если начался список инструкций - объявление переменных закончено
-                        if (regulation[i] == TT.InstructionList)    
-                        {
-                            declaration = false;
-                        }
                         if (regulation[i] == inputToken.Type)   // Занесение лексем в стек
-
                         {
                             stack.Push(inputToken);
                         }
